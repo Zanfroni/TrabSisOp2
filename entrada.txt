@@ -1,0 +1,33 @@
+sequencial
+lru
+8
+64
+16
+C p1 16
+C p2 18
+C p3 10
+A p1 14
+A p1 20
+A p2 17
+A p3 10
+M p1 8
+A p1 20
+M p3 5
+M p2 8
+A p1 1
+A p2 20
+A p1 5
+A p1 17
+A p1 20
+A p2 7
+A p2 9
+A p2 18
+A p2 25
+A p3 0
+A p3 12
+A p1 6
+A p1 18
+A p1 8
+M p2 10
+A p2 20
+M p1 10
