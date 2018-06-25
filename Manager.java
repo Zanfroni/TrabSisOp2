@@ -129,7 +129,7 @@ public class Manager {
                           break;
                 case "M": instructionM(inst[1], Integer.parseInt(inst[2]));
                           break;
-                /*case "T": instructionM(inst[1], Integer.parseInt(inst[2]));
+                /*case "T": instructionT(inst[1], Integer.parseInt(inst[2]));
                           break;*/
                default: break;
             }
@@ -141,6 +141,7 @@ public class Manager {
             boolean foundPage = false;
             LinkedList<Integer> foundPages = new LinkedList<>();
             int adSize = physAddress/pageSize;
+            boolean inside = false;
             int pages = (int) Math.ceil((double)memSize/(double)adSize);
             for(int i = 0; i < RAM.length; i++){
                 if(!fullPage[i]){
@@ -148,7 +149,6 @@ public class Manager {
                         foundPages.add(i);
                         pages--;
                     }if(RAM[i][0].equals(id)){
-                        boolean inside = false;
                         int aux = memSize;
                         for(int j = 0; j < RAM[0].length; j++){
                             if(RAM[i][j].equals("X")){
@@ -170,12 +170,65 @@ public class Manager {
                     break;
                 }
             }
-            if(!foundPage){
-                return;
-                //bosta
-            }
             
             Process proc = searchProcess(id);
+            
+            //=========
+            
+            if(!foundPage && (!inside)){
+                if(memSize > auxDisk[0].length){
+                    //printa problema de memória
+                    return;
+                }
+                for(int i = 0; i < auxDisk.length; i++){
+                    System.out.println("ESTOU BEM AQUI " + auxDisk[i]);
+                    if(auxDisk[i][0].equals("X")){
+                        //SWAP
+                        int swapPage = lruOrder.removeFirst();
+                        lruOrder.add(swapPage);
+                        //lembrar que falta ver a ID da matriz, pages e full/occ
+                        Process diskProc = searchProcess(RAM[swapPage][0]);
+                        for(int j = 0; j < auxDisk[0].length; j++){
+                            disk[i][j] = VM[swapPage][j];
+                            auxDisk[i][j] = RAM[swapPage][j];
+                            diskProc.setDisk(true);
+                            //falta contar pra ver se ta lotado
+                        }
+                        for(int r = 0; r < diskProc.getPages().size(); r++){
+                            if(diskProc.getPages().get(i) == swapPage) diskProc.getPages().remove(r);
+                        }
+                        LinkedList<Integer> newPages = new LinkedList<>();
+                        newPages.add(swapPage);
+                        diskProc.setPages(newPages);
+                        int currentAd = proc.getCurrentAddress();
+                        for(int r = 0; r < RAM[0].length; r++){
+                            if(memSize != 0){
+                                RAM[swapPage][r] = proc.getId();
+                                VM[swapPage][r] = currentAd;
+                                memSize--;
+                                currentAd++;
+                            }
+                            else{
+                                RAM[swapPage][r] = "X";
+                                VM[swapPage][r] = -1;
+                            }
+                        }
+                        proc.setCurrentAddress(currentAd);
+                        for(int r = 0; r < RAM[0].length; r++){
+                            if(VM[swapPage][r] == -1){
+                                fullPage[swapPage] = false;
+                            }
+                        }
+                        System.out.println("=======================");
+                        System.out.println("Page Fault");
+                        System.out.println("=======================");
+                        return;
+                    }
+                }
+            }
+            
+            //=========
+            
             for(int i =0; i < foundPages.size();i++){
                 if(!proc.getPages().contains(foundPages.get(i))) proc.setPages(foundPages);
             }

@@ -13,6 +13,7 @@ public class Process {
     private int mem;
     private int currentAddress = 0;
     private LinkedList<Integer> pages = new LinkedList<>();
+    private boolean inDisk = false;
     
     public Process(String id, int mem){
         this.id = id;
@@ -41,16 +42,24 @@ public class Process {
     
     public void setPages(LinkedList<Integer> pages){
         for(int i = 0; i < pages.size(); i++){
-            this.pages.add(pages.get(i));
+            if(!this.pages.contains(pages.get(i))) this.pages.add(pages.get(i));
         }
         
-        /*for(int i = 0; i < pages.size(); i++){
+        for(int i = 0; i < this.pages.size(); i++){
             System.out.println("bilada " + this.pages.get(i));
-        }*/
+        }
     }
     
     public LinkedList<Integer> getPages(){
         return pages;
+    }
+    
+    public void setDisk(boolean disk){
+        inDisk = disk;
+    }
+    
+    public boolean getDisk(){
+        return inDisk;
     }
     
 }
