@@ -11,6 +11,7 @@ public class App {
 
     public static void main(String[] args) throws IOException {
         Manager manager = new Manager();
+        manager.print();
     }
     
 }

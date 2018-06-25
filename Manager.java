@@ -83,8 +83,8 @@ public class Manager {
         if((Integer.parseInt(input)) % pageSize != 0) shutdown();
         disk = new int[pageSize][diskAddress/pageSize];
         auxDisk = new String[pageSize][diskAddress/pageSize];
-        //System.out.println(disk.length);
-        //System.out.println(disk[0].length);
+        System.out.println(disk.length);
+        System.out.println(disk[0].length);
         
         populate();
         //System.out.println("ok");
@@ -135,15 +135,56 @@ public class Manager {
     //MÉTODO QUE CRIA NOVO PROCESSO NAS MEMÓRIAS
     private void instructionC(String id, int memSize){
         if(!processNames.contains(id)){
-            process.add(new Process(id, memSize));
+            int pages = (int) Math.ceil((double)memSize/(double)pageSize);
+            boolean foundPage = false;
+            LinkedList<Integer> foundPages = new LinkedList<>();
+            for(int i = 0; i < ocuppiedPage.length; i++){
+                if(ocuppiedPage[i] == false){
+                    foundPages.add(i);
+                    pages--;
+                }
+                if(pages == 0){
+                    foundPage = true;
+                    break;
+                }
+            }
+            
+            if(!foundPage){
+                return;
+                //IMPRIMIR QUE DEU FALTA DE MEMÓRIA
+            }
+            
+            Process newProc = new Process(id, memSize);
+            process.add(newProc);
             processNames.add(id);
+            
             /*for(int i = 0; i < process.size(); i++){
                 System.out.print(process.get(i).getId());
             }*/
             
-            int pages = (int) Math.ceil((double)memSize/(double)pageSize);
-            //System.out.println(pages);
+            newProc.setPages(foundPages);
+            int currentAd = newProc.getCurrentAddress();
             
+            System.out.println("penis " + foundPages.size());
+            for(int i = 0; i < foundPages.size(); i++){
+                int actualPage = foundPages.get(i);
+                ocuppiedPage[actualPage] = true;
+                int k = 0;
+                System.out.println("jdsisjd  "  + actualPage);
+                for(int j = 0; j < RAM.length; j++){
+                    RAM[actualPage][j] = newProc.getId();
+                    VM[actualPage][j] = currentAd;
+                    currentAd++;
+                    k++;
+                    memSize--;
+                    System.out.println(memSize);
+                    if(k == 8) fullPage[actualPage] = true;
+                    if(memSize == 0) break;
+                    System.out.println("corno "  + RAM.length);
+                }
+                if(memSize == 0) break;
+            }
+            newProc.setCurrentAddress(currentAd);
             
         }
     }
@@ -186,6 +227,80 @@ public class Manager {
             ocuppiedPage[i] = false;
             fullPage[i] = false;
         }
+    }
+    
+    public void print(){
+        for(int i = 0; i < RAM.length; i++){
+            for(int j = 0; j < RAM[0].length; j++){
+                System.out.print(RAM[i][j] + "\t");
+            }
+            System.out.println();
+        }
+        
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        
+        for(int i = 0; i < VM.length; i++){
+            for(int j = 0; j < VM[0].length; j++){
+                System.out.print(VM[i][j] + "\t");
+            }
+            System.out.println();
+        }
+        
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        
+        for(int i = 0; i < disk.length; i++){
+            for(int j = 0; j < disk[0].length; j++){
+                System.out.print(disk[i][j] + "\t");
+            }
+            System.out.println();
+        }
+        
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        
+        for(int i = 0; i < auxDisk.length; i++){
+            for(int j = 0; j < auxDisk[0].length; j++){
+                System.out.print(auxDisk[i][j] + "\t");
+            }
+            System.out.println();
+        }
+        
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        
+        for(int i = 0; i < auxDisk.length; i++){
+            System.out.print(ocuppiedPage[i] + "\t");
+        }
+        
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        
+        for(int i = 0; i < auxDisk.length; i++){
+            System.out.print(fullPage[i] + "\t");
+        }
+        
     }
     
     //MÉTODO QUE FINALIZA O PROGRAMA EM CASO DE ERROS NO ARQUIVO DE ENTRADA

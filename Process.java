@@ -11,6 +11,7 @@ public class Process {
     
     private String id;
     private int mem;
+    private int currentAddress = 0;
     private LinkedList<Integer> pages = new LinkedList<>();
     
     public Process(String id, int mem){
@@ -30,12 +31,22 @@ public class Process {
         return mem;
     }
     
-    /*public void setPages(int[] pages){
-        this.pages = pages;
+    public void setCurrentAddress(int ad){
+        this.currentAddress = ad;
     }
     
-    public int[] getPages(){
-        return pages;
-    }*/
+    public int getCurrentAddress(){
+        return currentAddress;
+    }
+    
+    public void setPages(LinkedList<Integer> pages){
+        for(int i = 0; i < pages.size(); i++){
+            this.pages.add(pages.get(i));
+        }
+        
+        /*for(int i = 0; i < pages.size(); i++){
+            System.out.println(this.pages.get(i));
+        }*/
+    }
     
 }
