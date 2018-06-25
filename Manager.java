@@ -133,7 +133,55 @@ public class Manager {
     }
     
     private void instructionM(String id, int memSize){
-        
+        if(processNames.contains(id)){
+            boolean foundPage = false;
+            LinkedList<Integer> foundPages = new LinkedList<>();
+            int adSize = physAddress/pageSize;
+            int pages = (int) Math.ceil((double)memSize/(double)adSize);
+            for(int i = 0; i < RAM.length; i++){
+                if(!fullPage[i]){
+                    if(RAM[i][0].equals("X")){
+                        foundPages.add(i);
+                        pages--;
+                    }
+                }
+                if(pages == 0){
+                    foundPage = true;
+                    break;
+                }
+            }
+            if(!foundPage){
+                return;
+                //bosta
+            }
+            
+            Process proc = searchProcess(id);
+            for(int i =0; i < foundPages.size();i++){
+                if(!proc.getPages().contains(foundPages.get(i))) proc.setPages(foundPages);
+            }
+            
+            int currentAd = proc.getCurrentAddress();
+            
+            for(int i = 0; i < foundPages.size(); i++){
+                int actualPage = foundPages.get(i);
+                ocuppiedPage[actualPage] = true;
+                int k = 0;
+                for(int j = 0; j < RAM[0].length; j++){
+                    if(RAM[actualPage][j].equals("X") && VM[actualPage][j] == -1){
+                        RAM[actualPage][j] = proc.getId();
+                        VM[actualPage][j] = currentAd;
+                        currentAd++;
+                        memSize--;
+                        System.out.println(memSize);
+                    }
+                    k++;
+                    if(k == pageSize-1) fullPage[actualPage] = true;
+                    if(memSize == 0) break;
+                }
+                if(memSize == 0) break;
+            }
+            proc.setCurrentAddress(currentAd);
+        }
     }
     
     //MÉTODO QUE REALIZA O ACESSO A UM ENDEREÇO EM PÁGINA
