@@ -45,7 +45,7 @@ public class Process {
         }
         
         /*for(int i = 0; i < pages.size(); i++){
-            System.out.println(this.pages.get(i));
+            System.out.println("bilada " + this.pages.get(i));
         }*/
     }
     

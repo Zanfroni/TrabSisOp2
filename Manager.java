@@ -72,8 +72,8 @@ public class Manager {
         //System.out.println(input);
         physAddress = Integer.parseInt(input);
         if((Integer.parseInt(input)) % pageSize != 0) shutdown();
-        RAM = new String[pageSize][physAddress/pageSize];
-        VM = new int[pageSize][physAddress/pageSize];
+        RAM = new String[physAddress/pageSize][pageSize];
+        VM = new int[physAddress/pageSize][pageSize];
         //System.out.println(RAM.length);
         
         //LÊ A QUINTA LINHA
@@ -81,8 +81,8 @@ public class Manager {
         //System.out.println(input);
         diskAddress = Integer.parseInt(input);
         if((Integer.parseInt(input)) % pageSize != 0) shutdown();
-        disk = new int[pageSize][diskAddress/pageSize];
-        auxDisk = new String[pageSize][diskAddress/pageSize];
+        disk = new int[diskAddress/pageSize][pageSize];
+        auxDisk = new String[diskAddress/pageSize][pageSize];
         System.out.println(disk.length);
         System.out.println(disk[0].length);
         
@@ -171,16 +171,16 @@ public class Manager {
                 ocuppiedPage[actualPage] = true;
                 int k = 0;
                 System.out.println("jdsisjd  "  + actualPage);
-                for(int j = 0; j < RAM.length; j++){
+                for(int j = 0; j < RAM[0].length; j++){
                     RAM[actualPage][j] = newProc.getId();
                     VM[actualPage][j] = currentAd;
                     currentAd++;
                     k++;
                     memSize--;
                     System.out.println(memSize);
-                    if(k == 8) fullPage[actualPage] = true;
+                    if(k == pageSize-1) fullPage[actualPage] = true;
                     if(memSize == 0) break;
-                    System.out.println("corno "  + RAM.length);
+                    //System.out.println("corno "  + RAM.length);
                 }
                 if(memSize == 0) break;
             }
@@ -221,8 +221,8 @@ public class Manager {
             }
         }
         
-        ocuppiedPage = new boolean[pageSize];
-        fullPage = new boolean[pageSize];
+        ocuppiedPage = new boolean[physAddress/pageSize];
+        fullPage = new boolean[physAddress/pageSize];
         for(int i = 0; i < fullPage.length; i++){
             ocuppiedPage[i] = false;
             fullPage[i] = false;
@@ -286,7 +286,7 @@ public class Manager {
         System.out.println();
         System.out.println();
         
-        for(int i = 0; i < auxDisk.length; i++){
+        for(int i = 0; i < ocuppiedPage.length; i++){
             System.out.print(ocuppiedPage[i] + "\t");
         }
         
@@ -297,7 +297,7 @@ public class Manager {
         System.out.println();
         System.out.println();
         
-        for(int i = 0; i < auxDisk.length; i++){
+        for(int i = 0; i < fullPage.length; i++){
             System.out.print(fullPage[i] + "\t");
         }
         
