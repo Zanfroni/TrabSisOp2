@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package t2sisop;
+package trabsisiop2;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -25,6 +25,7 @@ public class Manager {
     private LinkedList<String> processNames = new LinkedList<>();
     private LinkedList<Process> process = new LinkedList<>();
     private LinkedList<String[]> instructions = new LinkedList<>();
+    private LinkedList<Integer> lruOrder = new LinkedList<>();
     
     private String[][] RAM;
     private int[][] VM;
@@ -66,6 +67,7 @@ public class Manager {
         input = in.readLine();
         //System.out.println(input);
         pageSize = Integer.parseInt(input);
+        if(algoritmo_troca_lru) setLRU();
         
         //LÊ A QUARTA LINHA
         input = in.readLine();
@@ -127,6 +129,8 @@ public class Manager {
                           break;
                 case "M": instructionM(inst[1], Integer.parseInt(inst[2]));
                           break;
+                /*case "T": instructionM(inst[1], Integer.parseInt(inst[2]));
+                          break;*/
                default: break;
             }
         }
@@ -287,9 +291,26 @@ public class Manager {
                     if(memSize == 0) break;
                     //System.out.println("corno "  + RAM.length);
                 }
+                
+                System.out.println("CU CGADAO " + actualPage);
+                if(algoritmo_troca_lru){
+                    for(int r = 0; r < lruOrder.size(); r++){
+                        System.out.println("AVELIXO " + r);
+                        if(lruOrder.get(r) == actualPage){
+                            int lruPage = lruOrder.remove(r);
+                            lruOrder.add(lruPage);
+                            break;
+                        }
+                    }
+                }
+                
                 if(memSize == 0) break;
             }
             newProc.setCurrentAddress(currentAd);
+            
+            for(int i = 0; i < lruOrder.size(); i++){
+                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
+            }
             
         }
     }
@@ -331,6 +352,16 @@ public class Manager {
         for(int i = 0; i < fullPage.length; i++){
             ocuppiedPage[i] = false;
             fullPage[i] = false;
+        }
+    }
+    
+    private void setLRU(){
+        for(int i = 0; i < pageSize; i++){
+            lruOrder.add(i);
+        }
+        
+        for(int i = 0; i < lruOrder.size(); i++){
+            System.out.println("----> " + lruOrder.get(i));
         }
     }
     
