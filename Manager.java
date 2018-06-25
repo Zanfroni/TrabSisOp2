@@ -143,6 +143,22 @@ public class Manager {
                     if(RAM[i][0].equals("X")){
                         foundPages.add(i);
                         pages--;
+                    }if(RAM[i][0].equals(id)){
+                        boolean inside = false;
+                        int aux = memSize;
+                        for(int j = 0; j < RAM[0].length; j++){
+                            if(RAM[i][j].equals("X")){
+                                aux--;
+                                if(aux == 0){
+                                    inside = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if(inside){
+                            foundPages.add(i);
+                            pages--;
+                        }
                     }
                 }
                 if(pages == 0){
@@ -175,7 +191,7 @@ public class Manager {
                         System.out.println(memSize);
                     }
                     k++;
-                    if(k == pageSize-1) fullPage[actualPage] = true;
+                    if(k == pageSize) fullPage[actualPage] = true;
                     if(memSize == 0) break;
                 }
                 if(memSize == 0) break;
