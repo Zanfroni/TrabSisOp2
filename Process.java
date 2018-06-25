@@ -1,4 +1,6 @@
-//package t2sisop;
+package t2sisop;
+
+import java.util.LinkedList;
 
 /**
  *
@@ -9,7 +11,7 @@ public class Process {
     
     private String id;
     private int mem;
-    private int[] pages;
+    private LinkedList<Integer> pages = new LinkedList<>();
     
     public Process(String id, int mem){
         this.id = id;
@@ -28,12 +30,12 @@ public class Process {
         return mem;
     }
     
-    public void setPages(int[] pages){
+    /*public void setPages(int[] pages){
         this.pages = pages;
     }
     
     public int[] getPages(){
         return pages;
-    }
+    }*/
     
 }

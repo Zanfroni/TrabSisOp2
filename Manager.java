@@ -1,4 +1,9 @@
-//package t2sisop;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package t2sisop;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -19,6 +24,14 @@ public class Manager {
     private int diskAddress, physAddress, pageSize;
     private LinkedList<String> processNames = new LinkedList<>();
     private LinkedList<Process> process = new LinkedList<>();
+    private LinkedList<String[]> instructions = new LinkedList<>();
+    
+    private String[][] RAM;
+    private int[][] VM;
+    private int[][] disk;
+    private String[][] auxDisk;
+    private boolean[] ocuppiedPage;
+    private boolean[] fullPage;
     
     public Manager() throws FileNotFoundException, IOException{
         System.out.println("Digite o endereco do arquivo de entrada:");
@@ -59,12 +72,22 @@ public class Manager {
         //System.out.println(input);
         physAddress = Integer.parseInt(input);
         if((Integer.parseInt(input)) % pageSize != 0) shutdown();
+        RAM = new String[pageSize][physAddress/pageSize];
+        VM = new int[pageSize][physAddress/pageSize];
+        //System.out.println(RAM.length);
         
         //LÊ A QUINTA LINHA
         input = in.readLine();
         //System.out.println(input);
         diskAddress = Integer.parseInt(input);
         if((Integer.parseInt(input)) % pageSize != 0) shutdown();
+        disk = new int[pageSize][diskAddress/pageSize];
+        auxDisk = new String[pageSize][diskAddress/pageSize];
+        //System.out.println(disk.length);
+        //System.out.println(disk[0].length);
+        
+        populate();
+        //System.out.println("ok");
         
         //SE O PROGRAMA FOR ALEATÓRIO, INICIA-SE A CRIAÇÃO DE TODOS
         //OS PROCESSOS E EMBARALHAMENTO DE INSTRUÇÕES
@@ -73,22 +96,38 @@ public class Manager {
         }
         
         //INICIA-SE A LEITURA DAS INSTRUÇÕES (C,A,M)
-        execute(in, input);
+        adjustInstruction(in, input);
+        execute();
         
     }
     
-    private void execute(BufferedReader in, String input) throws IOException{
-        String[] instruction;
-        while((input = in.readLine()) != null){
-            instruction = adjustInstruction(input);
-            switch(instruction[0]){
-                case "C": instructionC(instruction[1], Integer.parseInt(instruction[2]));
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    private void execute(){
+        String[] inst;
+        while(!instructions.isEmpty()){
+            inst = instructions.removeFirst();
+            switch(inst[0]){
+                case "C": instructionC(inst[1], Integer.parseInt(inst[2]));
                           break;
                 /*case "A": instructionA(instruction);
                           break;
                 case "M": instructionM(instruction);
                           break;*/
-                default: break;
+               default: break;
             }
         }
     }
@@ -110,12 +149,43 @@ public class Manager {
     }
     
     //MÉTODO QUE APLICA A SEPARAÇÃO DAS INSTRUÇÕES
-    private String[] adjustInstruction(String input){
-        String[] instruction = input.split(" ");
-        //System.out.println(instruction[0]);
-        //System.out.println(instruction[1]);
-        //System.out.println(instruction[2]);
-        return instruction;
+    private void adjustInstruction(BufferedReader in, String input) throws IOException{
+        String[] inst;
+        while((input = in.readLine()) != null){
+            inst = input.split(" ");
+            instructions.add(inst);
+        }
+        
+        /*for(int i = 0; i < instructions.size(); i++){
+            String lixo[] = instructions.get(i);
+            System.out.print(lixo[0] + " ");
+            System.out.print(lixo[1] + " ");
+            System.out.println(lixo[2]);
+        }*/
+    }
+    
+    //MÉTODO QUE POPULA AS MATRIZES E VETORES DE INTERESSE
+    private void populate(){
+        for(int i = 0; i < RAM.length; i++){
+            for(int j = 0; j < RAM[0].length; j++){
+                RAM[i][j] = "X";
+                VM[i][j] = -1;
+            }
+        }
+        
+        for(int i = 0; i < disk.length; i++){
+            for(int j = 0; j < disk[0].length; j++){
+                auxDisk[i][j] = "X";
+                disk[i][j] = -1;
+            }
+        }
+        
+        ocuppiedPage = new boolean[pageSize];
+        fullPage = new boolean[pageSize];
+        for(int i = 0; i < fullPage.length; i++){
+            ocuppiedPage[i] = false;
+            fullPage[i] = false;
+        }
     }
     
     //MÉTODO QUE FINALIZA O PROGRAMA EM CASO DE ERROS NO ARQUIVO DE ENTRADA
