@@ -49,4 +49,8 @@ public class Process {
         }*/
     }
     
+    public LinkedList<Integer> getPages(){
+        return pages;
+    }
+    
 }

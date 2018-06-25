@@ -123,13 +123,48 @@ public class Manager {
             switch(inst[0]){
                 case "C": instructionC(inst[1], Integer.parseInt(inst[2]));
                           break;
-                /*case "A": instructionA(instruction);
+                case "A": instructionA(inst[1], Integer.parseInt(inst[2]));
                           break;
-                case "M": instructionM(instruction);
+                /*case "M": instructionM(instruction);
                           break;*/
                default: break;
             }
         }
+    }
+    
+    //MÉTODO QUE REALIZA O ACESSO A UM ENDEREÇO EM PÁGINA
+    //Lembrar de botar o tempo para LRU
+    private void instructionA(String id, int index){
+        //System.out.println("=======================");
+        if(processNames.contains(id)){
+            Process proc = searchProcess(id);
+            //System.out.println("=======================");
+            if(index >= proc.getCurrentAddress()){
+                System.out.println("=======================");
+                System.out.println("Page Fault");
+                System.out.println("=======================");
+                return;
+            }
+            //lembrar de futuramente ver o disco
+            LinkedList<Integer> procPages = proc.getPages();
+            for(int i = 0; i < procPages.size(); i++){
+                int actualPage = procPages.get(i);
+                for(int j = 0; j < RAM[0].length; j++){
+                    if(VM[actualPage][j] == index){
+                        System.out.println("=======================");
+                        System.out.println("Acessado, lembre se do LRU");
+                        System.out.println("=======================");
+                    }
+                }
+            }
+        }
+    }
+    
+    private Process searchProcess(String id){
+        for(int i = 0; i < process.size(); i++){
+            if(process.get(i).getId().equals(id)) return process.get(i);
+        }
+        return null;
     }
     
     //MÉTODO QUE CRIA NOVO PROCESSO NAS MEMÓRIAS
