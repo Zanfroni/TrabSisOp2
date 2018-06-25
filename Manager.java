@@ -72,8 +72,8 @@ public class Manager {
         //System.out.println(input);
         physAddress = Integer.parseInt(input);
         if((Integer.parseInt(input)) % pageSize != 0) shutdown();
-        RAM = new String[physAddress/pageSize][pageSize];
-        VM = new int[physAddress/pageSize][pageSize];
+        RAM = new String[pageSize][physAddress/pageSize];
+        VM = new int[pageSize][physAddress/pageSize];
         //System.out.println(RAM.length);
         
         //LÊ A QUINTA LINHA
@@ -81,8 +81,8 @@ public class Manager {
         //System.out.println(input);
         diskAddress = Integer.parseInt(input);
         if((Integer.parseInt(input)) % pageSize != 0) shutdown();
-        disk = new int[diskAddress/pageSize][pageSize];
-        auxDisk = new String[diskAddress/pageSize][pageSize];
+        disk = new int[diskAddress/pageSize][physAddress/pageSize];
+        auxDisk = new String[diskAddress/pageSize][physAddress/pageSize];
         System.out.println(disk.length);
         System.out.println(disk[0].length);
         
@@ -125,11 +125,15 @@ public class Manager {
                           break;
                 case "A": instructionA(inst[1], Integer.parseInt(inst[2]));
                           break;
-                /*case "M": instructionM(instruction);
-                          break;*/
+                case "M": instructionM(inst[1], Integer.parseInt(inst[2]));
+                          break;
                default: break;
             }
         }
+    }
+    
+    private void instructionM(String id, int memSize){
+        
     }
     
     //MÉTODO QUE REALIZA O ACESSO A UM ENDEREÇO EM PÁGINA
@@ -170,7 +174,8 @@ public class Manager {
     //MÉTODO QUE CRIA NOVO PROCESSO NAS MEMÓRIAS
     private void instructionC(String id, int memSize){
         if(!processNames.contains(id)){
-            int pages = (int) Math.ceil((double)memSize/(double)pageSize);
+            int adSize = physAddress/pageSize;
+            int pages = (int) Math.ceil((double)memSize/(double)adSize);
             boolean foundPage = false;
             LinkedList<Integer> foundPages = new LinkedList<>();
             for(int i = 0; i < ocuppiedPage.length; i++){
@@ -206,6 +211,7 @@ public class Manager {
                 ocuppiedPage[actualPage] = true;
                 int k = 0;
                 System.out.println("jdsisjd  "  + actualPage);
+                System.out.println("jdsisjd323232323  "  + RAM[0].length);
                 for(int j = 0; j < RAM[0].length; j++){
                     RAM[actualPage][j] = newProc.getId();
                     VM[actualPage][j] = currentAd;
@@ -256,8 +262,8 @@ public class Manager {
             }
         }
         
-        ocuppiedPage = new boolean[physAddress/pageSize];
-        fullPage = new boolean[physAddress/pageSize];
+        ocuppiedPage = new boolean[pageSize];
+        fullPage = new boolean[pageSize];
         for(int i = 0; i < fullPage.length; i++){
             ocuppiedPage[i] = false;
             fullPage[i] = false;
