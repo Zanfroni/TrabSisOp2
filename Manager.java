@@ -198,9 +198,28 @@ public class Manager {
                     if(k == pageSize) fullPage[actualPage] = true;
                     if(memSize == 0) break;
                 }
+                
+                System.out.println("CU CGADAO " + actualPage);
+                if(algoritmo_troca_lru){
+                    for(int r = 0; r < lruOrder.size(); r++){
+                        System.out.println("AVELIXO " + r);
+                        if(lruOrder.get(r) == actualPage){
+                            int lruPage = lruOrder.remove(r);
+                            lruOrder.add(lruPage);
+                            break;
+                        }
+                    }
+                }
+                
                 if(memSize == 0) break;
             }
+            
             proc.setCurrentAddress(currentAd);
+            
+            for(int i = 0; i < lruOrder.size(); i++){
+                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
+            }
+            
         }
     }
     
@@ -226,8 +245,21 @@ public class Manager {
                         System.out.println("=======================");
                         System.out.println("Acessado, lembre se do LRU");
                         System.out.println("=======================");
+                        if(algoritmo_troca_lru){
+                            for(int r = 0; r < lruOrder.size(); r++){
+                                System.out.println("AVELIXO " + r);
+                                if(lruOrder.get(r) == actualPage){
+                                    int lruPage = lruOrder.remove(r);
+                                    lruOrder.add(lruPage);
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
+            }
+            for(int i = 0; i < lruOrder.size(); i++){
+                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
             }
         }
     }
