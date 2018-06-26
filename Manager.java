@@ -40,7 +40,6 @@ public class Manager {
         
         //LÃŠ A PRIMEIRA LINHA
         input = in.readLine();
-        //System.out.println(input);
         if(input.equals("sequencial") || input.equals("0") || input.equals("s")){
             sequencial = true;
         } else if(input.equals("aleatorio") || input.equals("1") || input.equals("a")){
@@ -51,7 +50,6 @@ public class Manager {
         
         //LÃŠ A SEGUNDA LINHA
         input = in.readLine();
-        //System.out.println(input);
         if(input.equals("lru")){
             algoritmo_troca_lru = true;
         } else if(input.equals("aleatorio")){
@@ -62,22 +60,18 @@ public class Manager {
         
         //LÃŠ A TERCEIRA LINHA
         input = in.readLine();
-        //System.out.println(input);
         pageSize = Integer.parseInt(input);
         if(algoritmo_troca_lru) setLRU();
         
         //LÃŠ A QUARTA LINHA
         input = in.readLine();
-        //System.out.println(input);
         physAddress = Integer.parseInt(input);
         if((Integer.parseInt(input)) % pageSize != 0) shutdown();
         RAM = new String[pageSize][physAddress/pageSize];
         VM = new int[pageSize][physAddress/pageSize];
-        //System.out.println(RAM.length);
         
         //LÃŠ A QUINTA LINHA
         input = in.readLine();
-        //System.out.println(input);
         diskAddress = Integer.parseInt(input);
         if((Integer.parseInt(input)) % pageSize != 0) shutdown();
         disk = new int[diskAddress/pageSize][physAddress/pageSize];
@@ -86,15 +80,8 @@ public class Manager {
         System.out.println(disk[0].length);
         
         populate();
-        //System.out.println("ok");
         
-        //SE O PROGRAMA FOR ALEATÃ“RIO, INICIA-SE A CRIAÃ‡ÃƒO DE TODOS
-        //OS PROCESSOS E EMBARALHAMENTO DE INSTRUÃ‡Ã•ES
-        if(!sequencial){
-            //TO DO
-        }
-        
-        //INICIA-SE A LEITURA DAS INSTRUÃ‡Ã•ES (C,A,M)
+        //INICIA-SE A LEITURA DAS INSTRUÃ‡Ã•ES (C,A,M,T)
         adjustInstruction(in, input);
         execute();
         
@@ -117,31 +104,48 @@ public class Manager {
     
     private void execute(){
         String[] inst;
-        while(!instructions.isEmpty()){
-            inst = instructions.removeFirst();
-            switch(inst[0]){
-                case "C": instructionC(inst[1], Integer.parseInt(inst[2]));
-                for(int i = 0; i < lruOrder.size(); i++){
-                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
+        if(sequencial){
+            while(!instructions.isEmpty()){
+                inst = instructions.removeFirst();
+                switch(inst[0]){
+                    case "C": instructionC(inst[1], Integer.parseInt(inst[2]));
+                              break;
+                    case "A": instructionA(inst[1], Integer.parseInt(inst[2]));
+                              break;
+                    case "M": instructionM(inst[1], Integer.parseInt(inst[2]));
+                              break;
+                    case "T": instructionT(inst[1]);
+                              break;
+                   default: break;
+                }
             }
+        }else{
+            for(int i = 0; i < 2; i++){
+                int newProc = rand.nextInt(8);
+                int mem = rand.nextInt(21);
+                instructionC("p" + Integer.toString(newProc), mem);
+            }
+            while(true){
+                int proc = rand.nextInt(process.size());
+                int newProc = rand.nextInt(8);
+                int mem = rand.nextInt(21);
+                int command = rand.nextInt(100);
+                if(command >= 98) instructionT(process.get(proc).getId());
+                if(command <=74 && command >= 4) instructionA(process.get(proc).getId(), mem);
+                if(command >=75 && command <= 97) instructionM(process.get(proc).getId(), mem);
+                if(command <= 3) instructionC("p" + Integer.toString(newProc), mem);
                 
-                          break;
-                case "A": instructionA(inst[1], Integer.parseInt(inst[2]));
-                for(int i = 0; i < lruOrder.size(); i++){
-                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
-            }
-                          break;
-                case "M": instructionM(inst[1], Integer.parseInt(inst[2]));
-                for(int i = 0; i < lruOrder.size(); i++){
-                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
-            }
-                          break;
-                case "T": instructionT(inst[1]);
-                for(int i = 0; i < lruOrder.size(); i++){
-                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
-            }
-                          break;
-               default: break;
+                int stopTime = 0;
+                for(int i = 0; i < fullPage.length; i++){
+                    if(ocuppiedPage[i]) stopTime++;
+                }
+                for(int i = 0; i < fullPage.length; i++){
+                    if(fullPage[i]) stopTime++;
+                }
+                for(int i = 0; i < auxDisk.length; i++){
+                    if(!auxDisk[i][0].equals("X")) stopTime++;
+                }
+                if(stopTime >= ((fullPage.length*2)-2  + auxDisk.length)) break;
             }
         }
     }
@@ -217,7 +221,6 @@ public class Manager {
                     return;
                 }
                 for(int i = 0; i < auxDisk.length; i++){
-                    System.out.println("ESTOU BEM AQUI " + auxDisk[i][0]);
                     if(auxDisk[i][0].equals("X")){
                         //SWAP
                         int swapPage = 0;
@@ -234,9 +237,8 @@ public class Manager {
                             diskProc.setDisk(true);
                         }
                         for(int r = 0; r < diskProc.getPages().size(); r++){
-                            if(diskProc.getPages().get(i) == swapPage){
+                            if(diskProc.getPages().get(r) == swapPage){
                                 diskProc.getPages().remove(r);
-                                System.out.println("DDDDV " + r);
                             }
                         }
                         LinkedList<Integer> newPages = new LinkedList<>();
@@ -287,18 +289,14 @@ public class Manager {
                         RAM[actualPage][j] = proc.getId();
                         VM[actualPage][j] = currentAd;
                         currentAd++;
-                        memSize--;
-                        System.out.println(memSize);
-                    }
+                        memSize--;                    }
                     k++;
                     if(k == pageSize) fullPage[actualPage] = true;
                     if(memSize == 0) break;
                 }
                 
-                System.out.println("CU CGADAO " + actualPage);
                 if(algoritmo_troca_lru){
                     for(int r = 0; r < lruOrder.size(); r++){
-                        System.out.println("AVELIXO " + r);
                         if(lruOrder.get(r) == actualPage){
                             int lruPage = lruOrder.remove(r);
                             lruOrder.add(lruPage);
@@ -321,10 +319,8 @@ public class Manager {
     //MÃ‰TODO QUE REALIZA O ACESSO A UM ENDEREÃ‡O EM PÃGINA
     //Lembrar de botar o tempo para LRU
     private void instructionA(String id, int index){
-        //System.out.println("=======================");
         if(processNames.contains(id)){
             Process proc = searchProcess(id);
-            //System.out.println("=======================");
             if(index >= proc.getCurrentAddress()){
                 System.out.println("=======================");
                 System.out.println("Page Fault");
@@ -342,7 +338,6 @@ public class Manager {
                         System.out.println("=======================");
                         if(algoritmo_troca_lru){
                             for(int r = 0; r < lruOrder.size(); r++){
-                                System.out.println("AVELIXO " + r);
                                 if(lruOrder.get(r) == actualPage){
                                     int lruPage = lruOrder.remove(r);
                                     lruOrder.add(lruPage);
@@ -401,16 +396,6 @@ public class Manager {
                                         proc.setDisk(true);
                                     }
                                 }
-                                
-                                
-                                for(int o = 0; o < diskProc.getPages().size(); o++){
-                                    System.out.println("FAUSTINHO " + diskProc.getPages().get(o));
-                                }
-                                for(int o = 0; o < proc.getPages().size(); o++){
-                                    System.out.println("FAUSTAUM " + proc.getPages().get(o));
-                                }
-                                
-                                
                             }
                         }
                     }
@@ -418,54 +403,6 @@ public class Manager {
                 System.out.println("=======================");
                 System.out.println("Page Fault");
                 System.out.println("=======================");
-                /*
-                for(int i = 0; i < auxDisk.length; i++){
-                    System.out.println("ESTOU BEM AQUI " + auxDisk[i][0]);
-                    if(auxDisk[i][0].equals("X")){
-                        //SWAP
-                        int swapPage = lruOrder.removeFirst();
-                        lruOrder.add(swapPage);
-                        Process diskProc = searchProcess(RAM[swapPage][0]);
-                        for(int j = 0; j < auxDisk[0].length; j++){
-                            disk[i][j] = VM[swapPage][j];
-                            auxDisk[i][j] = RAM[swapPage][j];
-                            diskProc.setDisk(true);
-                        }
-                        for(int r = 0; r < diskProc.getPages().size(); r++){
-                            if(diskProc.getPages().get(i) == swapPage){
-                                diskProc.getPages().remove(r);
-                                System.out.println("DDDDV " + r);
-                            }
-                        }
-                        LinkedList<Integer> newPages = new LinkedList<>();
-                        newPages.add(swapPage);
-                        proc.setPages(newPages);
-                        int currentAd = proc.getCurrentAddress();
-                        for(int r = 0; r < RAM[0].length; r++){
-                            if(memSize != 0){
-                                RAM[swapPage][r] = proc.getId();
-                                VM[swapPage][r] = currentAd;
-                                memSize--;
-                                currentAd++;
-                            }
-                            else{
-                                RAM[swapPage][r] = "X";
-                                VM[swapPage][r] = -1;
-                            }
-                        }
-                        proc.setCurrentAddress(currentAd);
-                        for(int r = 0; r < RAM[0].length; r++){
-                            if(VM[swapPage][r] == -1){
-                                fullPage[swapPage] = false;
-                            }
-                        }
-                        System.out.println("=======================");
-                        System.out.println("Page Fault");
-                        System.out.println("=======================");
-                        return;
-                    }
-                }
-                */
             }
         }
     }
@@ -496,44 +433,35 @@ public class Manager {
             }
             
             if(!foundPage){
+                System.out.println("=======================");
+                System.out.println("Memória insuficiente");
+                System.out.println("=======================");
                 return;
-                //IMPRIMIR QUE DEU FALTA DE MEMÃ“RIA
             }
             
             Process newProc = new Process(id, memSize);
             process.add(newProc);
             processNames.add(id);
             
-            /*for(int i = 0; i < process.size(); i++){
-                System.out.print(process.get(i).getId());
-            }*/
-            
             newProc.setPages(foundPages);
             int currentAd = newProc.getCurrentAddress();
             
-            System.out.println("penis " + foundPages.size());
             for(int i = 0; i < foundPages.size(); i++){
                 int actualPage = foundPages.get(i);
                 ocuppiedPage[actualPage] = true;
                 int k = 0;
-                System.out.println("jdsisjd  "  + actualPage);
-                System.out.println("jdsisjd323232323  "  + RAM[0].length);
                 for(int j = 0; j < RAM[0].length; j++){
                     RAM[actualPage][j] = newProc.getId();
                     VM[actualPage][j] = currentAd;
                     currentAd++;
                     k++;
                     memSize--;
-                    System.out.println(memSize);
                     if(k == pageSize-1) fullPage[actualPage] = true;
                     if(memSize == 0) break;
-                    //System.out.println("corno "  + RAM.length);
                 }
                 
-                System.out.println("CU CGADAO " + actualPage);
                 if(algoritmo_troca_lru){
                     for(int r = 0; r < lruOrder.size(); r++){
-                        System.out.println("AVELIXO " + r);
                         if(lruOrder.get(r) == actualPage){
                             int lruPage = lruOrder.remove(r);
                             lruOrder.add(lruPage);
@@ -554,17 +482,18 @@ public class Manager {
     //MÃ‰TODO QUE APLICA A SEPARAÃ‡ÃƒO DAS INSTRUÃ‡Ã•ES
     private void adjustInstruction(BufferedReader in, String input) throws IOException{
         String[] inst;
-        while((input = in.readLine()) != null){
-            inst = input.split(" ");
-            instructions.add(inst);
+        if(sequencial){
+            while((input = in.readLine()) != null){
+                inst = input.split(" ");
+                instructions.add(inst);
+            }
+        }else{
+            LinkedList<String[]> newinst = new LinkedList<>();
+            while((input = in.readLine()) != null){
+                inst = input.split(" ");
+                if(inst[0].equals("C")) instructionC(inst[1], Integer.parseInt(inst[2]));
+            }
         }
-        
-        /*for(int i = 0; i < instructions.size(); i++){
-            String lixo[] = instructions.get(i);
-            System.out.print(lixo[0] + " ");
-            System.out.print(lixo[1] + " ");
-            System.out.println(lixo[2]);
-        }*/
     }
     
     //MÃ‰TODO QUE POPULA AS MATRIZES E VETORES DE INTERESSE
@@ -594,10 +523,6 @@ public class Manager {
     private void setLRU(){
         for(int i = 0; i < pageSize; i++){
             lruOrder.add(i);
-        }
-        
-        for(int i = 0; i < lruOrder.size(); i++){
-            System.out.println("----> " + lruOrder.get(i));
         }
     }
     
