@@ -1,4 +1,4 @@
-package t2sisop;
+package trabsisiop2;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -117,6 +117,15 @@ public class Manager {
         String[] inst;
         while(!instructions.isEmpty()){
             inst = instructions.removeFirst();
+            
+            
+            
+            for(int i = 0; i < lruOrder.size(); i++){
+                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
+            }
+            
+            
+            
             switch(inst[0]){
                 case "C": instructionC(inst[1], Integer.parseInt(inst[2]));
                           break;
@@ -265,10 +274,9 @@ public class Manager {
             }
             
             proc.setCurrentAddress(currentAd);
-            
-            for(int i = 0; i < lruOrder.size(); i++){
-                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
-            }
+            System.out.println("=======================");
+            System.out.println("Novo espaço alocado");
+            System.out.println("=======================");
             
         }
     }
@@ -308,9 +316,6 @@ public class Manager {
                     }
                 }
             }
-            for(int i = 0; i < lruOrder.size(); i++){
-                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
-            }
             if(proc.getDisk()){
                 for(int i = 0; i < auxDisk.length; i++){
                     if(auxDisk[i][0].equals(proc.getId())){
@@ -340,9 +345,22 @@ public class Manager {
                                         fullPage[swapPage] = false;
                                     }
                                 }
-                                
+                                LinkedList<Integer> newPage = new LinkedList<>();
                                 //verificar as page list
                                 //verfiicar o disco
+                                diskProc.setDisk(true);
+                                diskProc.getPages().remove(swapPage);
+                                //removi as páginas do que foi pro disco
+                                //falta ver agora, se o que foi pras páginas
+                                //ainda está em disco.
+                                newPage.add(swapPage);
+                                proc.setPages(newPage);
+                                proc.setDisk(false);
+                                for(int r = 0; r < auxDisk.length; r++){
+                                    if(auxDisk[r][0].equals(proc.getId())){
+                                        proc.setDisk(true);
+                                    }
+                                }
                             }
                         }
                     }
@@ -478,9 +496,7 @@ public class Manager {
             }
             newProc.setCurrentAddress(currentAd);
             
-            for(int i = 0; i < lruOrder.size(); i++){
-                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
-            }
+            
             
         }
     }
