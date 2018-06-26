@@ -1,4 +1,4 @@
-package trabsisiop2;;
+package trabsisiop2;
 
 import java.util.LinkedList;
 

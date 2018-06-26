@@ -236,9 +236,8 @@ public class Manager {
             Process proc = searchProcess(id);
             if(!foundPage && (!inside)){
                 if(memSize > auxDisk[0].length){
-                    System.out.println("=======================");
-                    System.out.println("Memória insuficiente");
-                    System.out.println("=======================");
+                    print();
+                    System.out.println("Memória insuficiente para alocação de " + memSize + " enderecos");
                     return;
                 }
                 for(int i = 0; i < auxDisk.length; i++){
@@ -287,9 +286,11 @@ public class Manager {
                                 fullPage[swapPage] = false;
                             }
                         }
-                        System.out.println("=======================");
-                        System.out.println("Page Fault");
-                        System.out.println("=======================");
+                        print();
+                        System.out.println("PAGE FAULT");
+                        System.out.println("Pagina " + swapPage + " alocada para disco");
+                        System.out.print("Memoria alocada em PAGINA " + swapPage);
+                        System.out.println();
                         return;
                     }
                 }
@@ -332,10 +333,13 @@ public class Manager {
             }
             
             proc.setCurrentAddress(currentAd);
-            System.out.println("=======================");
-            System.out.println("Novo espaço alocado");
-            System.out.println("=======================");
             
+            print();
+            System.out.print("Processo " + id + " alocado em ");
+            for(int i = 0; i < foundPages.size(); i++){
+                System.out.print("PAGINA " + foundPages.get(i) + " | ");
+            }
+            System.out.println("\n");
         }
     }
     
@@ -349,9 +353,8 @@ public class Manager {
         if(processNames.contains(id)){
             Process proc = searchProcess(id);
             if(index >= proc.getCurrentAddress()){
-                System.out.println("=======================");
-                System.out.println("Page Fault");
-                System.out.println("=======================");
+                print();
+                System.out.println("PAGE FAULT para acesso em " + "| " + id + " " + index + " |");
                 return;
             }
             //lembrar de futuramente ver o disco
@@ -360,9 +363,8 @@ public class Manager {
                 int actualPage = procPages.get(i);
                 for(int j = 0; j < RAM[0].length; j++){
                     if(VM[actualPage][j] == index){
-                        System.out.println("=======================");
-                        System.out.println("Acessado, lembre se do LRU");
-                        System.out.println("=======================");
+                        print();
+                        System.out.println("Memoria acesso em FRAME " + index + " em PAGINA " + actualPage);
                         if(algoritmo_troca_lru){
                             for(int r = 0; r < lruOrder.size(); r++){
                                 if(lruOrder.get(r) == actualPage){
@@ -375,12 +377,12 @@ public class Manager {
                     }
                 }
             }
+            int swapPage = -1;
             if(proc.getDisk()){
                 for(int i = 0; i < auxDisk.length; i++){
                     if(auxDisk[i][0].equals(proc.getId())){
                         for(int j = 0; j < auxDisk[0].length; j++){
                             if(disk[i][j] == index){
-                                int swapPage = 0;
                                 if(algoritmo_troca_lru){
                                     swapPage = lruOrder.removeFirst();
                                     lruOrder.add(swapPage);
@@ -429,9 +431,11 @@ public class Manager {
                         }
                     }
                 }
-                System.out.println("=======================");
-                System.out.println("Page Fault");
-                System.out.println("=======================");
+                print();
+                System.out.println("PAGE FAULT");
+                System.out.println("Pagina " + swapPage + " alocada para disco");
+                System.out.print("Memoria acesso em FRAME " + index + " em PAGINA " + swapPage);
+                System.out.println();
             }
         }
     }
@@ -464,9 +468,8 @@ public class Manager {
             }
             
             if(!foundPage){
-                System.out.println("=======================");
-                System.out.println("Memória insuficiente");
-                System.out.println("=======================");
+                    print();
+                    System.out.println("Memória insuficiente para alocação de " + memSize + " enderecos");
                 return;
             }
             
@@ -505,7 +508,7 @@ public class Manager {
             }
             newProc.setCurrentAddress(currentAd);
             print();
-            System.out.print("Processo " + id + " alocado em ");
+            System.out.print("Processo " + id + " criado em ");
             for(int i = 0; i < foundPages.size(); i++){
                 System.out.print("PAGINA " + foundPages.get(i) + " | ");
             }
