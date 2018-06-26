@@ -15,6 +15,8 @@ import java.util.Scanner;
  */
 public class Manager {
     
+    //ATRIBUTOS
+    Scanner in = new Scanner(System.in);
     private boolean sequencial = true;
     private boolean algoritmo_troca_lru = true;
     private int diskAddress, physAddress, pageSize;
@@ -24,6 +26,8 @@ public class Manager {
     private LinkedList<Integer> lruOrder = new LinkedList<>();
     private Random rand = new Random();
     
+    //MEMORIAS RAM, VIRTUAL, DISCO E VETORES QUE MOSTRAM O QUAO OCUPADAS
+    //AS MEMORIAS ESTAO
     private String[][] RAM;
     private int[][] VM;
     private int[][] disk;
@@ -31,14 +35,14 @@ public class Manager {
     private boolean[] ocuppiedPage;
     private boolean[] fullPage;
     
+    //CONSTRUTOR
     public Manager() throws FileNotFoundException, IOException{
         System.out.println("Digite o endereco do arquivo de entrada:");
-	Scanner scan = new Scanner(System.in);
-	String input = "";//scan.nextLine();
+	String input = "";
         BufferedReader in = new BufferedReader(new FileReader("entrada" + ".txt"));
         
         
-        //LÃŠ A PRIMEIRA LINHA
+        //LE A PRIMEIRA LINHA
         input = in.readLine();
         if(input.equals("sequencial") || input.equals("0") || input.equals("s")){
             sequencial = true;
@@ -48,7 +52,7 @@ public class Manager {
             shutdown();
         }
         
-        //LÃŠ A SEGUNDA LINHA
+        //LE A SEGUNDA LINHA
         input = in.readLine();
         if(input.equals("lru")){
             algoritmo_troca_lru = true;
@@ -58,19 +62,19 @@ public class Manager {
             shutdown();
         }
         
-        //LÃŠ A TERCEIRA LINHA
+        //LE A TERCEIRA LINHA
         input = in.readLine();
         pageSize = Integer.parseInt(input);
         if(algoritmo_troca_lru) setLRU();
         
-        //LÃŠ A QUARTA LINHA
+        //LE A QUARTA LINHA
         input = in.readLine();
         physAddress = Integer.parseInt(input);
         if((Integer.parseInt(input)) % pageSize != 0) shutdown();
         RAM = new String[pageSize][physAddress/pageSize];
         VM = new int[pageSize][physAddress/pageSize];
         
-        //LÃŠ A QUINTA LINHA
+        //LE A QUINTA LINHA
         input = in.readLine();
         diskAddress = Integer.parseInt(input);
         if((Integer.parseInt(input)) % pageSize != 0) shutdown();
@@ -81,31 +85,20 @@ public class Manager {
         
         populate();
         
-        //INICIA-SE A LEITURA DAS INSTRUÃ‡Ã•ES (C,A,M,T)
+        //INICIA-SE A LEITURA DAS INSTRUCOES (C,A,M,T)
         adjustInstruction(in, input);
         execute();
         
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    //INICIA O PROCESSAMENTO DE CADA INSTRUCAO. DIFERENCIA SE E SEQUENCIAL OU
+    //ALEATORIO
     private void execute(){
         String[] inst;
         if(sequencial){
             while(!instructions.isEmpty()){
+                System.out.println("Pressione um botão para continuar");
+                in.nextLine();
                 inst = instructions.removeFirst();
                 switch(inst[0]){
                     case "C": instructionC(inst[1], Integer.parseInt(inst[2]));
@@ -126,7 +119,7 @@ public class Manager {
                 instructionC("p" + Integer.toString(newProc), mem);
             }
             while(true){
-                int proc = rand.nextInt(process.size() == 0 ? 1 : process.size());
+                int proc = rand.nextInt(process.isEmpty() ? 1 : process.size());
                 int newProc = rand.nextInt(8);
                 int mem = rand.nextInt(21);
                 int command = rand.nextInt(100);
@@ -153,6 +146,9 @@ public class Manager {
         }
     }
     
+    //INSTRUCAO DE TERMINO DE PROCESSO
+    //ESTA INSTRUCAO VAI REMOVER TODAS AS INSTANCIAS DO PROCESSO DA
+    //MEMORIA E DISCO, LIBERANDO ESPACO
     private void instructionT(String id){
         Process removed = searchProcess(id);
         for(int i = 0; i < RAM.length; i++){
@@ -173,11 +169,31 @@ public class Manager {
                 }
             }
         }
+        LinkedList<Integer> removedPlaces = new LinkedList<>();
+        removedPlaces = removed.getPages();
         processNames.remove(removed);
         process.remove(removed);
+        print();
+        System.out.print("Processo " + id + " terminado em ");
+        for(int i = 0; i < removedPlaces.size(); i++){
+            System.out.print("PAGINA " + removedPlaces.get(i) + " | ");
+        }
+        for(int i = 0; i < auxDisk.length; i++){
+            if(auxDisk[i][0].equals("X")){
+                System.out.print("PAGINA DE DISCO " + i + " | ");
+            }
+        }
+        System.out.println("\n");
     }
     
+    //INSTRUCAO DE ALOCACAO
+    //ESTA INSTRUCAO VAI ALOCAR ESPACO PARA O TAL PROCESSO
+    //ELA INFELIZMENTE TEM UMA LIMITACAO. ELA NAO ALOCA EM DISCO SE O TAMANHO
+    //DO QUE PRECISA E MAIOR QUE DE UMA LINHA TODA DO DISCO
     private void instructionM(String id, int memSize){
+        
+        //ESTE INICIO, ELE CALCULA QUANTAS PAGINAS ELE PRECISA PARA ALOCAR
+        //E SE A MEMORIA POSSUI ESTA QUANTIDADE LIVRE
         if(processNames.contains(id)){
             boolean foundPage = false;
             LinkedList<Integer> foundPages = new LinkedList<>();
@@ -200,6 +216,8 @@ public class Manager {
                                 }
                             }
                         }
+                        //SE ELE PUDER ALOCAR DENTRO DE UMA PAGINA JA OCUPADA
+                        //CAI NESTA CONDICAO
                         if(inside){
                             foundPages.add(i);
                             pages--;
@@ -212,10 +230,10 @@ public class Manager {
                 }
             }
             
+            //SE ELE NAO ENCONTRAR PAGINAS SUFICIENTES NA MEMORIA,
+            //ELE VAI FINALMENTE PROCURAR NO DISCO SE TEM ESPACO LA.
+            //SE TIVER, ELE REALIZA UM SWAP.
             Process proc = searchProcess(id);
-            
-            //=========
-            
             if(!foundPage && (!inside)){
                 if(memSize > auxDisk[0].length){
                     System.out.println("=======================");
@@ -277,8 +295,8 @@ public class Manager {
                 }
             }
             
-            //=========
-            
+            //FINALMENTE, SE ELE ENCONTRAR ESPACO NA MEMORIA, VAI OCUPAR
+            //OS ENDERECOS DESIGNADOS NELA
             for(int i =0; i < foundPages.size();i++){
                 if(!proc.getPages().contains(foundPages.get(i))) proc.setPages(foundPages);
             }
@@ -321,8 +339,12 @@ public class Manager {
         }
     }
     
-    //MÃ‰TODO QUE REALIZA O ACESSO A UM ENDEREÃ‡O EM PÃGINA
-    //Lembrar de botar o tempo para LRU
+    //METODO QUE EXECUTA INSTRUCAO DE ACESSO
+    
+    //ELE SIMPLESMENTE PROCURA NA MEMORIA SE O EQUIVALENTE AO INDEX DA INSTRUCAO
+    //EQUIVALE AO INDEX DO PROCESSO MANDADO. SE FOR, ELE ACESSA. CASO NAO
+    //ENCONTRE NA MEMORIA, ELE TENTA PROCURAR NO DISCO. SE ENCONTRAR LA,
+    //REALIZA UM SWAP
     private void instructionA(String id, int index){
         if(processNames.contains(id)){
             Process proc = searchProcess(id);
@@ -398,7 +420,7 @@ public class Manager {
                                 newPage.add(swapPage);
                                 proc.setPages(newPage);
                                 proc.setDisk(false);
-                                for(int r = 0; r < auxDisk.length; r++){
+                                for(int r = 0; r < auxDisk.length ;r++){
                                     if(auxDisk[r][0].equals(proc.getId())){
                                         proc.setDisk(true);
                                     }
@@ -414,6 +436,7 @@ public class Manager {
         }
     }
     
+    //METODO AUXILIAR QUE PROCURA PROCESSO POR STRING
     private Process searchProcess(String id){
         for(int i = 0; i < process.size(); i++){
             if(process.get(i).getId().equals(id)) return process.get(i);
@@ -421,7 +444,8 @@ public class Manager {
         return null;
     }
     
-    //MÃ‰TODO QUE CRIA NOVO PROCESSO NAS MEMÃ“RIAS
+    //METODO QUE EXECUTA INSTRUCAO DE CRIACAO DE PROCESSO. BASTANTE SIMPLES.
+    //SE NAO TER ESPACO, MANDA MENSAGEM SEM MEMORIA.
     private void instructionC(String id, int memSize){
         if(!processNames.contains(id)){
             int adSize = physAddress/pageSize;
@@ -480,13 +504,16 @@ public class Manager {
                 if(memSize == 0) break;
             }
             newProc.setCurrentAddress(currentAd);
-            
-            
-            
+            print();
+            System.out.print("Processo " + id + " alocado em ");
+            for(int i = 0; i < foundPages.size(); i++){
+                System.out.print("PAGINA " + foundPages.get(i) + " | ");
+            }
+            System.out.println("\n");
         }
     }
     
-    //MÃ‰TODO QUE APLICA A SEPARAÃ‡ÃƒO DAS INSTRUÃ‡Ã•ES
+    //ESTE METODO AJUSTA O ARQUIVO TXT PARA SER PREPARADO PARA SER PROCESSADO
     private void adjustInstruction(BufferedReader in, String input) throws IOException{
         String[] inst;
         if(sequencial){
@@ -503,7 +530,7 @@ public class Manager {
         }
     }
     
-    //MÃ‰TODO QUE POPULA AS MATRIZES E VETORES DE INTERESSE
+    //METODO QUE POPULA AS MATRIZES E VETORES DE INTERESSE
     private void populate(){
         for(int i = 0; i < RAM.length; i++){
             for(int j = 0; j < RAM[0].length; j++){
@@ -527,12 +554,16 @@ public class Manager {
         }
     }
     
+    //METODO QUE PREPARA O ALGORITMO LRU. NOTA QUE AQUI TEMPO NAO E CALCULADO.
+    //SIMPLESMENTE E REALIZADO UMA FILA E CADA VEZ QUE A PAGINA TEM ACESSO/ALOCACAO,
+    //ESTA MESMA VAI PARA A O FINAL DA FILA. BASTANTE INTUITIVO.
     private void setLRU(){
         for(int i = 0; i < pageSize; i++){
             lruOrder.add(i);
         }
     }
     
+    //METODO QUE PRINTA MEMORIA RAM, VIRTUAL E DISCO
     public void print(){
         for(int i = 0; i < RAM.length; i++){
             for(int j = 0; j < RAM[0].length; j++){
@@ -541,9 +572,6 @@ public class Manager {
             System.out.println();
         }
         
-        System.out.println();
-        System.out.println();
-        System.out.println();
         System.out.println();
         System.out.println();
         System.out.println();
@@ -558,9 +586,6 @@ public class Manager {
         System.out.println();
         System.out.println();
         System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
         
         for(int i = 0; i < disk.length; i++){
             for(int j = 0; j < disk[0].length; j++){
@@ -568,48 +593,12 @@ public class Manager {
             }
             System.out.println();
         }
-        
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        
-        for(int i = 0; i < auxDisk.length; i++){
-            for(int j = 0; j < auxDisk[0].length; j++){
-                System.out.print(auxDisk[i][j] + "\t");
-            }
-            System.out.println();
-        }
-        
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        
-        for(int i = 0; i < ocuppiedPage.length; i++){
-            System.out.print(ocuppiedPage[i] + "\t");
-        }
-        
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        
-        for(int i = 0; i < fullPage.length; i++){
-            System.out.print(fullPage[i] + "\t");
-        }
-        
+        System.out.println("\n");
     }
     
-    //MÃ‰TODO QUE FINALIZA O PROGRAMA EM CASO DE ERROS NO ARQUIVO DE ENTRADA
+    //METODO QUE FINALIZA O PROGRAMA EM CASO DE ERROS NO ARQUIVO DE ENTRADA
     private void shutdown(){
-        System.out.print("O programa foi fechado inesperadamente (condiÃ§Ãµes de entrada nÃ£o atingidas)");
+        System.out.print("O programa foi fechado inesperadamente (condicoes de entrada nao atingidas)");
         System.exit(0);
     }
 }
