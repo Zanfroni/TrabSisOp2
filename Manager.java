@@ -117,21 +117,22 @@ public class Manager {
         String[] inst;
         while(!instructions.isEmpty()){
             inst = instructions.removeFirst();
-            
-            
-            
-            for(int i = 0; i < lruOrder.size(); i++){
-                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
-            }
-            
-            
-            
             switch(inst[0]){
                 case "C": instructionC(inst[1], Integer.parseInt(inst[2]));
+                for(int i = 0; i < lruOrder.size(); i++){
+                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
+            }
+                
                           break;
                 case "A": instructionA(inst[1], Integer.parseInt(inst[2]));
+                for(int i = 0; i < lruOrder.size(); i++){
+                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
+            }
                           break;
                 case "M": instructionM(inst[1], Integer.parseInt(inst[2]));
+                for(int i = 0; i < lruOrder.size(); i++){
+                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
+            }
                           break;
                 /*case "T": instructionT(inst[1], Integer.parseInt(inst[2]));
                           break;*/
@@ -346,13 +347,12 @@ public class Manager {
                                     }
                                 }
                                 LinkedList<Integer> newPage = new LinkedList<>();
-                                //verificar as page list
-                                //verfiicar o disco
                                 diskProc.setDisk(true);
-                                diskProc.getPages().remove(swapPage);
-                                //removi as páginas do que foi pro disco
-                                //falta ver agora, se o que foi pras páginas
-                                //ainda está em disco.
+                                for(int r = 0; r < diskProc.getPages().size(); r++){
+                                    if(diskProc.getPages().get(r) == swapPage){
+                                        diskProc.getPages().remove(r);
+                                    }
+                                }
                                 newPage.add(swapPage);
                                 proc.setPages(newPage);
                                 proc.setDisk(false);
@@ -361,6 +361,16 @@ public class Manager {
                                         proc.setDisk(true);
                                     }
                                 }
+                                
+                                
+                                for(int o = 0; o < diskProc.getPages().size(); o++){
+                                    System.out.println("FAUSTINHO " + diskProc.getPages().get(o));
+                                }
+                                for(int o = 0; o < proc.getPages().size(); o++){
+                                    System.out.println("FAUSTAUM " + proc.getPages().get(o));
+                                }
+                                
+                                
                             }
                         }
                     }
