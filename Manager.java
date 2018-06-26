@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -21,6 +22,7 @@ public class Manager {
     private LinkedList<Process> process = new LinkedList<>();
     private LinkedList<String[]> instructions = new LinkedList<>();
     private LinkedList<Integer> lruOrder = new LinkedList<>();
+    private Random rand = new Random();
     
     private String[][] RAM;
     private int[][] VM;
@@ -218,8 +220,13 @@ public class Manager {
                     System.out.println("ESTOU BEM AQUI " + auxDisk[i][0]);
                     if(auxDisk[i][0].equals("X")){
                         //SWAP
-                        int swapPage = lruOrder.removeFirst();
-                        lruOrder.add(swapPage);
+                        int swapPage = 0;
+                        if(algoritmo_troca_lru){
+                            swapPage = lruOrder.removeFirst();
+                            lruOrder.add(swapPage);
+                        }else{
+                            swapPage = rand.nextInt(pageSize);
+                        }
                         Process diskProc = searchProcess(RAM[swapPage][0]);
                         for(int j = 0; j < auxDisk[0].length; j++){
                             disk[i][j] = VM[swapPage][j];
@@ -351,9 +358,13 @@ public class Manager {
                     if(auxDisk[i][0].equals(proc.getId())){
                         for(int j = 0; j < auxDisk[0].length; j++){
                             if(disk[i][j] == index){
-                                //SWAP
-                                int swapPage = lruOrder.removeFirst();
-                                lruOrder.add(swapPage);
+                                int swapPage = 0;
+                                if(algoritmo_troca_lru){
+                                    swapPage = lruOrder.removeFirst();
+                                    lruOrder.add(swapPage);
+                                }else{
+                                    swapPage = rand.nextInt(pageSize);
+                                }
                                 Process diskProc = searchProcess(RAM[swapPage][0]);
                                 String[] auxNew = new String[auxDisk[0].length];
                                 int[] auxNew2 = new int[auxDisk[0].length];
