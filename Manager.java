@@ -134,11 +134,38 @@ public class Manager {
                 System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
             }
                           break;
-                /*case "T": instructionT(inst[1], Integer.parseInt(inst[2]));
-                          break;*/
+                case "T": instructionT(inst[1]);
+                for(int i = 0; i < lruOrder.size(); i++){
+                System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
+            }
+                          break;
                default: break;
             }
         }
+    }
+    
+    private void instructionT(String id){
+        Process removed = searchProcess(id);
+        for(int i = 0; i < RAM.length; i++){
+            if(RAM[i][0].equals(id)){
+                for(int j = 0; j < RAM[0].length; j++){
+                    RAM[i][j] = "X";
+                    VM[i][j] = -1;
+                }
+                ocuppiedPage[i] = false;
+                fullPage[i] = false;
+            }
+        }
+        for(int i = 0; i < auxDisk.length; i++){
+            if(auxDisk[i][0].equals(id)){
+                for(int j = 0; j < auxDisk[0].length; j++){
+                    auxDisk[i][j] = "X";
+                    disk[i][j] = -1;
+                }
+            }
+        }
+        processNames.remove(removed);
+        process.remove(removed);
     }
     
     private void instructionM(String id, int memSize){
@@ -182,7 +209,9 @@ public class Manager {
             
             if(!foundPage && (!inside)){
                 if(memSize > auxDisk[0].length){
-                    //printa problema de memÃ³ria
+                    System.out.println("=======================");
+                    System.out.println("Memória insuficiente");
+                    System.out.println("=======================");
                     return;
                 }
                 for(int i = 0; i < auxDisk.length; i++){
