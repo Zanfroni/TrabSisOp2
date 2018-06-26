@@ -1,9 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package trabsisiop2;
+package t2sisop;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -41,7 +36,7 @@ public class Manager {
         BufferedReader in = new BufferedReader(new FileReader("entrada" + ".txt"));
         
         
-        //LÊ A PRIMEIRA LINHA
+        //LÃŠ A PRIMEIRA LINHA
         input = in.readLine();
         //System.out.println(input);
         if(input.equals("sequencial") || input.equals("0") || input.equals("s")){
@@ -52,7 +47,7 @@ public class Manager {
             shutdown();
         }
         
-        //LÊ A SEGUNDA LINHA
+        //LÃŠ A SEGUNDA LINHA
         input = in.readLine();
         //System.out.println(input);
         if(input.equals("lru")){
@@ -63,13 +58,13 @@ public class Manager {
             shutdown();
         }
         
-        //LÊ A TERCEIRA LINHA
+        //LÃŠ A TERCEIRA LINHA
         input = in.readLine();
         //System.out.println(input);
         pageSize = Integer.parseInt(input);
         if(algoritmo_troca_lru) setLRU();
         
-        //LÊ A QUARTA LINHA
+        //LÃŠ A QUARTA LINHA
         input = in.readLine();
         //System.out.println(input);
         physAddress = Integer.parseInt(input);
@@ -78,7 +73,7 @@ public class Manager {
         VM = new int[pageSize][physAddress/pageSize];
         //System.out.println(RAM.length);
         
-        //LÊ A QUINTA LINHA
+        //LÃŠ A QUINTA LINHA
         input = in.readLine();
         //System.out.println(input);
         diskAddress = Integer.parseInt(input);
@@ -91,13 +86,13 @@ public class Manager {
         populate();
         //System.out.println("ok");
         
-        //SE O PROGRAMA FOR ALEATÓRIO, INICIA-SE A CRIAÇÃO DE TODOS
-        //OS PROCESSOS E EMBARALHAMENTO DE INSTRUÇÕES
+        //SE O PROGRAMA FOR ALEATÃ“RIO, INICIA-SE A CRIAÃ‡ÃƒO DE TODOS
+        //OS PROCESSOS E EMBARALHAMENTO DE INSTRUÃ‡Ã•ES
         if(!sequencial){
             //TO DO
         }
         
-        //INICIA-SE A LEITURA DAS INSTRUÇÕES (C,A,M)
+        //INICIA-SE A LEITURA DAS INSTRUÃ‡Ã•ES (C,A,M)
         adjustInstruction(in, input);
         execute();
         
@@ -177,29 +172,30 @@ public class Manager {
             
             if(!foundPage && (!inside)){
                 if(memSize > auxDisk[0].length){
-                    //printa problema de memória
+                    //printa problema de memÃ³ria
                     return;
                 }
                 for(int i = 0; i < auxDisk.length; i++){
-                    System.out.println("ESTOU BEM AQUI " + auxDisk[i]);
+                    System.out.println("ESTOU BEM AQUI " + auxDisk[i][0]);
                     if(auxDisk[i][0].equals("X")){
                         //SWAP
                         int swapPage = lruOrder.removeFirst();
                         lruOrder.add(swapPage);
-                        //lembrar que falta ver a ID da matriz, pages e full/occ
                         Process diskProc = searchProcess(RAM[swapPage][0]);
                         for(int j = 0; j < auxDisk[0].length; j++){
                             disk[i][j] = VM[swapPage][j];
                             auxDisk[i][j] = RAM[swapPage][j];
                             diskProc.setDisk(true);
-                            //falta contar pra ver se ta lotado
                         }
                         for(int r = 0; r < diskProc.getPages().size(); r++){
-                            if(diskProc.getPages().get(i) == swapPage) diskProc.getPages().remove(r);
+                            if(diskProc.getPages().get(i) == swapPage){
+                                diskProc.getPages().remove(r);
+                                System.out.println("DDDDV " + r);
+                            }
                         }
                         LinkedList<Integer> newPages = new LinkedList<>();
                         newPages.add(swapPage);
-                        diskProc.setPages(newPages);
+                        proc.setPages(newPages);
                         int currentAd = proc.getCurrentAddress();
                         for(int r = 0; r < RAM[0].length; r++){
                             if(memSize != 0){
@@ -214,6 +210,7 @@ public class Manager {
                             }
                         }
                         proc.setCurrentAddress(currentAd);
+                        fullPage[swapPage] = true;
                         for(int r = 0; r < RAM[0].length; r++){
                             if(VM[swapPage][r] == -1){
                                 fullPage[swapPage] = false;
@@ -276,7 +273,7 @@ public class Manager {
         }
     }
     
-    //MÉTODO QUE REALIZA O ACESSO A UM ENDEREÇO EM PÁGINA
+    //MÃ‰TODO QUE REALIZA O ACESSO A UM ENDEREÃ‡O EM PÃGINA
     //Lembrar de botar o tempo para LRU
     private void instructionA(String id, int index){
         //System.out.println("=======================");
@@ -304,7 +301,7 @@ public class Manager {
                                 if(lruOrder.get(r) == actualPage){
                                     int lruPage = lruOrder.remove(r);
                                     lruOrder.add(lruPage);
-                                    break;
+                                    return;
                                 }
                             }
                         }
@@ -313,6 +310,94 @@ public class Manager {
             }
             for(int i = 0; i < lruOrder.size(); i++){
                 System.out.println("ACUTAL ORDER ---> " + lruOrder.get(i));
+            }
+            if(proc.getDisk()){
+                for(int i = 0; i < auxDisk.length; i++){
+                    if(auxDisk[i][0].equals(proc.getId())){
+                        for(int j = 0; j < auxDisk[0].length; j++){
+                            if(disk[i][j] == index){
+                                //SWAP
+                                int swapPage = lruOrder.removeFirst();
+                                lruOrder.add(swapPage);
+                                Process diskProc = searchProcess(RAM[swapPage][0]);
+                                String[] auxNew = new String[auxDisk[0].length];
+                                int[] auxNew2 = new int[auxDisk[0].length];
+                                for(int k = 0; k < auxDisk[0].length; k++){
+                                    auxNew[k] = RAM[swapPage][k];
+                                    auxNew2[k] = VM[swapPage][k];
+                                }
+                                for(int k = 0; k < auxDisk[0].length; k++){
+                                    RAM[swapPage][k] = auxDisk[i][k];
+                                    VM[swapPage][k] = disk[i][k];
+                                }
+                                for(int k = 0; k < auxDisk[0].length; k++){
+                                    auxDisk[i][k] = auxNew[k];
+                                    disk[i][k] = auxNew2[k];
+                                }
+                                fullPage[swapPage] = true;
+                                for(int r = 0; r < RAM[0].length; r++){
+                                    if(VM[swapPage][r] == -1){
+                                        fullPage[swapPage] = false;
+                                    }
+                                }
+                                
+                                //verificar as page list
+                                //verfiicar o disco
+                            }
+                        }
+                    }
+                }
+                System.out.println("=======================");
+                System.out.println("Page Fault");
+                System.out.println("=======================");
+                /*
+                for(int i = 0; i < auxDisk.length; i++){
+                    System.out.println("ESTOU BEM AQUI " + auxDisk[i][0]);
+                    if(auxDisk[i][0].equals("X")){
+                        //SWAP
+                        int swapPage = lruOrder.removeFirst();
+                        lruOrder.add(swapPage);
+                        Process diskProc = searchProcess(RAM[swapPage][0]);
+                        for(int j = 0; j < auxDisk[0].length; j++){
+                            disk[i][j] = VM[swapPage][j];
+                            auxDisk[i][j] = RAM[swapPage][j];
+                            diskProc.setDisk(true);
+                        }
+                        for(int r = 0; r < diskProc.getPages().size(); r++){
+                            if(diskProc.getPages().get(i) == swapPage){
+                                diskProc.getPages().remove(r);
+                                System.out.println("DDDDV " + r);
+                            }
+                        }
+                        LinkedList<Integer> newPages = new LinkedList<>();
+                        newPages.add(swapPage);
+                        proc.setPages(newPages);
+                        int currentAd = proc.getCurrentAddress();
+                        for(int r = 0; r < RAM[0].length; r++){
+                            if(memSize != 0){
+                                RAM[swapPage][r] = proc.getId();
+                                VM[swapPage][r] = currentAd;
+                                memSize--;
+                                currentAd++;
+                            }
+                            else{
+                                RAM[swapPage][r] = "X";
+                                VM[swapPage][r] = -1;
+                            }
+                        }
+                        proc.setCurrentAddress(currentAd);
+                        for(int r = 0; r < RAM[0].length; r++){
+                            if(VM[swapPage][r] == -1){
+                                fullPage[swapPage] = false;
+                            }
+                        }
+                        System.out.println("=======================");
+                        System.out.println("Page Fault");
+                        System.out.println("=======================");
+                        return;
+                    }
+                }
+                */
             }
         }
     }
@@ -324,7 +409,7 @@ public class Manager {
         return null;
     }
     
-    //MÉTODO QUE CRIA NOVO PROCESSO NAS MEMÓRIAS
+    //MÃ‰TODO QUE CRIA NOVO PROCESSO NAS MEMÃ“RIAS
     private void instructionC(String id, int memSize){
         if(!processNames.contains(id)){
             int adSize = physAddress/pageSize;
@@ -344,7 +429,7 @@ public class Manager {
             
             if(!foundPage){
                 return;
-                //IMPRIMIR QUE DEU FALTA DE MEMÓRIA
+                //IMPRIMIR QUE DEU FALTA DE MEMÃ“RIA
             }
             
             Process newProc = new Process(id, memSize);
@@ -400,7 +485,7 @@ public class Manager {
         }
     }
     
-    //MÉTODO QUE APLICA A SEPARAÇÃO DAS INSTRUÇÕES
+    //MÃ‰TODO QUE APLICA A SEPARAÃ‡ÃƒO DAS INSTRUÃ‡Ã•ES
     private void adjustInstruction(BufferedReader in, String input) throws IOException{
         String[] inst;
         while((input = in.readLine()) != null){
@@ -416,7 +501,7 @@ public class Manager {
         }*/
     }
     
-    //MÉTODO QUE POPULA AS MATRIZES E VETORES DE INTERESSE
+    //MÃ‰TODO QUE POPULA AS MATRIZES E VETORES DE INTERESSE
     private void populate(){
         for(int i = 0; i < RAM.length; i++){
             for(int j = 0; j < RAM[0].length; j++){
@@ -524,9 +609,9 @@ public class Manager {
         
     }
     
-    //MÉTODO QUE FINALIZA O PROGRAMA EM CASO DE ERROS NO ARQUIVO DE ENTRADA
+    //MÃ‰TODO QUE FINALIZA O PROGRAMA EM CASO DE ERROS NO ARQUIVO DE ENTRADA
     private void shutdown(){
-        System.out.print("O programa foi fechado inesperadamente (condições de entrada não atingidas)");
+        System.out.print("O programa foi fechado inesperadamente (condiÃ§Ãµes de entrada nÃ£o atingidas)");
         System.exit(0);
     }
 }

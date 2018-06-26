@@ -1,4 +1,4 @@
-package trabsisiop2;
+package t2sisop;
 
 import java.util.LinkedList;
 
@@ -63,3 +63,4 @@ public class Process {
     }
     
 }
+

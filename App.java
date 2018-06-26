@@ -1,4 +1,4 @@
-package trabsisiop2;
+package t2sisop;
 
 import java.io.IOException;
 
