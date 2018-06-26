@@ -126,14 +126,16 @@ public class Manager {
                 instructionC("p" + Integer.toString(newProc), mem);
             }
             while(true){
-                int proc = rand.nextInt(process.size());
+                int proc = rand.nextInt(process.size() == 0 ? 1 : process.size());
                 int newProc = rand.nextInt(8);
                 int mem = rand.nextInt(21);
                 int command = rand.nextInt(100);
-                if(command >= 98) instructionT(process.get(proc).getId());
-                if(command <=74 && command >= 4) instructionA(process.get(proc).getId(), mem);
-                if(command >=75 && command <= 97) instructionM(process.get(proc).getId(), mem);
-                if(command <= 3) instructionC("p" + Integer.toString(newProc), mem);
+                if(!process.isEmpty()){
+                    if(command >= 98) instructionT(process.get(proc).getId());
+                    if(command <=74 && command >= 4) instructionA(process.get(proc).getId(), mem);
+                    if(command >=75 && command <= 97) instructionM(process.get(proc).getId(), mem);
+                    if(command <= 3) instructionC("p" + Integer.toString(newProc), mem);
+                }
                 
                 int stopTime = 0;
                 for(int i = 0; i < fullPage.length; i++){
@@ -146,6 +148,7 @@ public class Manager {
                     if(!auxDisk[i][0].equals("X")) stopTime++;
                 }
                 if(stopTime >= ((fullPage.length*2)-2  + auxDisk.length)) break;
+                if(process.isEmpty()) break;
             }
         }
     }
@@ -234,11 +237,13 @@ public class Manager {
                         for(int j = 0; j < auxDisk[0].length; j++){
                             disk[i][j] = VM[swapPage][j];
                             auxDisk[i][j] = RAM[swapPage][j];
-                            diskProc.setDisk(true);
+                            if(diskProc != null) diskProc.setDisk(true);
                         }
-                        for(int r = 0; r < diskProc.getPages().size(); r++){
-                            if(diskProc.getPages().get(r) == swapPage){
-                                diskProc.getPages().remove(r);
+                        if(diskProc != null){
+                            for(int r = 0; r < diskProc.getPages().size(); r++){
+                                if(diskProc.getPages().get(r) == swapPage){
+                                    diskProc.getPages().remove(r);
+                                }
                             }
                         }
                         LinkedList<Integer> newPages = new LinkedList<>();
@@ -382,10 +387,12 @@ public class Manager {
                                     }
                                 }
                                 LinkedList<Integer> newPage = new LinkedList<>();
-                                diskProc.setDisk(true);
-                                for(int r = 0; r < diskProc.getPages().size(); r++){
-                                    if(diskProc.getPages().get(r) == swapPage){
-                                        diskProc.getPages().remove(r);
+                                if(diskProc != null) diskProc.setDisk(true);
+                                if(diskProc != null){
+                                    for(int r = 0; r < diskProc.getPages().size(); r++){
+                                        if(diskProc.getPages().get(r) == swapPage){
+                                            diskProc.getPages().remove(r);
+                                        }
                                     }
                                 }
                                 newPage.add(swapPage);

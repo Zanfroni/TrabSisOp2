@@ -44,10 +44,6 @@ public class Process {
         for(int i = 0; i < pages.size(); i++){
             if(!this.pages.contains(pages.get(i))) this.pages.add(pages.get(i));
         }
-        
-        for(int i = 0; i < this.pages.size(); i++){
-            System.out.println("bilada " + this.pages.get(i));
-        }
     }
     
     public LinkedList<Integer> getPages(){
